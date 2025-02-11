@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   web:
@@ -6,19 +6,15 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - .:/app
-      - static_volume:/app/static
-      - media_volume:/app/media
+      - type: bind
+        source: .
+        target: /app
     working_dir: /app
     environment:
       - DEBUG=0
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,[seu-dominio]
-    command: >
-      sh -c "pip install -r requirements.txt &&
-             python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             python manage.py runserver 0.0.0.0:8000"
-
-volumes:
-  static_volume:
-  media_volume:
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+    command: sh -c "cd /app && pip install -r requirements.txt && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
